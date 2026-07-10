@@ -810,38 +810,58 @@ async function refreshEmployeeCache() {
   cachedEmployees = res.data; 
 }
 
+// NEW: Search Input Event Listener
+document.getElementById('empSearchInput').addEventListener('input', (e) => {
+  const searchVal = e.target.value.toLowerCase();
+  const filteredData = cachedEmployees.filter(emp => 
+    emp.EmpName.toLowerCase().includes(searchVal) || 
+    emp.EmpID.toLowerCase().includes(searchVal)
+  );
+  renderEmployeeTable(filteredData);
+});
+
 async function loadEmployees() {
   const tbody = document.getElementById('employeeTableBody'); 
   tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Loading…</td></tr>';
+  // Clear search bar on reload
+  document.getElementById('empSearchInput').value = ''; 
+  
   try {
     await refreshEmployeeCache();
-    if (!cachedEmployees.length) { 
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No employees yet.</td></tr>'; 
-      return; 
-    }
-    tbody.innerHTML = cachedEmployees.map(e => `
-      <tr>
-        <td style="color:var(--text-2);font-family:var(--font-mono);font-size:12px;">${e.EmpID}</td>
-        <td>${e.EmpName}</td>
-        <td>${e.Team}</td>
-        <td>
-          <select class="status-select" onchange="updateEmpField('${e.EmpID}','wfhType',this.value)">
-            <option ${e.WFHType === 'Permanent' ? 'selected' : ''}>Permanent</option>
-            <option ${e.WFHType === 'Temporary' ? 'selected' : ''}>Temporary</option>
-          </select>
-        </td>
-        <td>
-          <select class="status-select" onchange="updateEmpField('${e.EmpID}','status',this.value)">
-            <option ${e.Status === 'Active' ? 'selected' : ''}>Active</option>
-            <option ${e.Status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-          </select>
-        </td>
-        <td></td>
-      </tr>
-    `).join('');
+    renderEmployeeTable(cachedEmployees);
   } catch (err) { 
     showToast(err.message, true); 
   }
+}
+
+// NEW: Extracted rendering logic into its own function so search can use it
+function renderEmployeeTable(data) {
+  const tbody = document.getElementById('employeeTableBody');
+  if (!data.length) { 
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No employees found.</td></tr>'; 
+    return; 
+  }
+  
+  tbody.innerHTML = data.map(e => `
+    <tr>
+      <td style="color:var(--text-2);font-family:var(--font-mono);font-size:12px;">${e.EmpID}</td>
+      <td>${e.EmpName}</td>
+      <td>${e.Team}</td>
+      <td>
+        <select class="status-select" onchange="updateEmpField('${e.EmpID}','wfhType',this.value)">
+          <option ${e.WFHType === 'Permanent' ? 'selected' : ''}>Permanent</option>
+          <option ${e.WFHType === 'Temporary' ? 'selected' : ''}>Temporary</option>
+        </select>
+      </td>
+      <td>
+        <select class="status-select" onchange="updateEmpField('${e.EmpID}','status',this.value)">
+          <option ${e.Status === 'Active' ? 'selected' : ''}>Active</option>
+          <option ${e.Status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+        </select>
+      </td>
+      <td></td>
+    </tr>
+  `).join('');
 }
 
 async function updateEmpField(empId, field, value) { 
