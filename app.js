@@ -248,6 +248,10 @@ function getFormattedTd(val) {
   else if (formatted === 'NO') cssClass = 'bg-no';
   else if (formatted === 'LEAVE') cssClass = 'bg-leave';
   else if (formatted === 'NA') cssClass = 'bg-na';
+
+  else if (formatted === 'MEETING') cssClass = 'bg-meeting'; 
+  else if (formatted === 'HD') cssClass = 'bg-hd';
+  else if (formatted === 'SHIFT OVER') cssClass = 'bg-shift-over';
   
   return `<td class="${cssClass}">${formatted}</td>`;
 }
@@ -544,7 +548,7 @@ function renderVerificationUI() {
 }
 
 function statusButtons(current, isLocked) {
-  return ['Yes', 'No', 'NA', 'Leave'].map(o => `
+  return ['Yes', 'No', 'NA', 'Leave', 'Meeting', 'HD', 'Shift Over'].map(o => `
     <button type="button" class="status-btn ${o === current ? 'active' : ''}" data-value="${o}" ${isLocked ? 'disabled' : ''}>${o}</button>
   `).join('');
 }
