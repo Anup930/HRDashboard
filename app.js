@@ -39,7 +39,7 @@ function setBtnLoading(btn, isLoading, text = 'Saving…') {
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
+  const password = document.getElementById('loginPassword').value.trim();
   const errorBox = document.getElementById('loginError');
   const btn = document.getElementById('loginSubmitBtn');
   
@@ -50,9 +50,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const res = await API.login(email, password);
     currentUser = res.user;
     Session.save(currentUser);
-    enterApp();
+    try {
+      enterApp();
+    } catch (appErr) {
+      console.error('Error entering app:', appErr);
+      showToast('App loaded with warnings: ' + appErr.message, true);
+    }
   } catch (err) {
-    errorBox.textContent = err.message;
+    errorBox.textContent = err.message || 'Login failed. Please check credentials.';
     errorBox.style.display = 'block';
   } finally {
     setBtnLoading(btn, false);

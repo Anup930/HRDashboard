@@ -4,10 +4,18 @@ const API = {
     try {
       const res = await fetch(CONFIG.API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' }, // avoids CORS preflight with Apps Script
+        mode: 'cors',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action, payload })
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        throw new Error('Server returned invalid response: ' + text.slice(0, 120));
+      }
       if (!data.success) throw new Error(data.error || 'Request failed');
       return data;
     } catch (err) {
